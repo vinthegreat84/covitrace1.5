@@ -83,17 +83,23 @@ if st.sidebar.checkbox('Vacinnations progress (global)'):
    key='download2-csv'
     )
     
-    # top 10 entries of 'people_vaccinated' 
-    if st.checkbox('top 10 locations based on people vaccinated as on '+today):
-        top10_people_vaccinated=sub_df.sort_values('people_vaccinated', ascending=False).drop_duplicates(['location']).drop(["people_vaccinated_per_hundred", "people_fully_vaccinated", "people_fully_vaccinated_per_hundred"], axis = 1)
-        st.write(top10_people_vaccinated.head(10))
+# top and bottom 10 entries of 'people_vaccinated'
+    perform_people_vaccinated=sub_df.sort_values('people_vaccinated', ascending=False).drop_duplicates(['location']).drop(["people_vaccinated_per_hundred", "people_fully_vaccinated", "people_fully_vaccinated_per_hundred"], axis = 1)
+    
+    if st.checkbox('Top locations based on people vaccinated as on '+today):
+        st.write(perform_people_vaccinated.head(10))
+    if st.checkbox('Bottom 10 locations based on people vaccinated as on '+today):
+        st.write(perform_people_vaccinated.tail(10))        
 
-    # top 10 entries of 'people_fully_vaccinated'
-    if st.checkbox('top 10 locations based on people fully vaccinated as on '+today):
-        top10_people_fully_vaccinated=sub_df.sort_values('people_fully_vaccinated', ascending=False).drop_duplicates(['location']).drop(["people_vaccinated","people_vaccinated_per_hundred", "people_fully_vaccinated_per_hundred"], axis = 1)    
-        st.write(top10_people_fully_vaccinated.head(10))
+# top and bottom 10 entries of 'people_fully_vaccinated'
+    perform_people_fully_vaccinated=sub_df.sort_values('people_fully_vaccinated', ascending=False).drop_duplicates(['location']).drop(["people_vaccinated","people_vaccinated_per_hundred", "people_fully_vaccinated_per_hundred"], axis = 1)
+    
+    if st.checkbox('Top 10 locations based on people fully vaccinated as on '+today):            
+        st.write(perform_people_fully_vaccinated.head(10))
+    if st.checkbox('Bottom 10 locations based on people fully vaccinated as on '+today):            
+        st.write(perform_people_fully_vaccinated.tail(10))
 
-# Vacinnations progress (countrywise)     
+        # Vacinnations progress (countrywise)     
 if st.sidebar.checkbox('Vacinnations progress (countrywise)'):
     # selection of country from 'location'
     country = st.selectbox("Select the country: ", sub_df['location'].unique())
