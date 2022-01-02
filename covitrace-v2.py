@@ -82,6 +82,16 @@ if st.sidebar.checkbox('Vacinnations progress (global)'):
    "text/csv",
    key='download2-csv'
     )
+    
+    # top 10 entries of 'people_vaccinated' 
+    if st.checkbox('top 10 locations based on people vaccinated as on '+today):
+        top10_people_vaccinated=sub_df.sort_values('people_vaccinated', ascending=False).drop_duplicates(['location']).drop(["people_vaccinated_per_hundred", "people_fully_vaccinated", "people_fully_vaccinated_per_hundred"], axis = 1)
+        st.write(top10_people_vaccinated.head(10))
+
+    # top 10 entries of 'people_fully_vaccinated'
+    if st.checkbox('top 10 locations based on people fully vaccinated as on '+today):
+        top10_people_fully_vaccinated=sub_df.sort_values('people_fully_vaccinated', ascending=False).drop_duplicates(['location']).drop(["people_vaccinated","people_vaccinated_per_hundred", "people_fully_vaccinated_per_hundred"], axis = 1)    
+        st.write(top10_people_fully_vaccinated.head(10))
 
 # Vacinnations progress (countrywise)     
 if st.sidebar.checkbox('Vacinnations progress (countrywise)'):
@@ -195,6 +205,6 @@ if st.sidebar.checkbox('Vacinnations progress (comparison)'):
         
 st.sidebar.write("For vaccination dataset (updated each morning, London time), check out the [citation](https://www.nature.com/articles/s41562-021-01122-8)", unsafe_allow_html=True)
     
-st.sidebar.write("For source code, check out my [github](https://github.com/vinthegreat84/covitrace1.5)", unsafe_allow_html=True)
+st.sidebar.write("For source code, check out my [github](https://github.com/vinthegreat84/CoVid)", unsafe_allow_html=True)
 
 st.sidebar.write("If you want to get in touch, you can find me on [linkedin](https://www.linkedin.com/in/vinay-babu-81791015/)", unsafe_allow_html=True)
