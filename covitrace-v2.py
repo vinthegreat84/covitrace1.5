@@ -24,8 +24,9 @@ df = fetch_vaccination()
 
 today = date.today().strftime("%d %b, %Y")
 
-st.title("Covid Vaccination Analysis - 1.5")
+st.title("covitrace - 1.5")
 st.write('## Welcome to the Covid Vaccination Analysis')
+st.caption('Check the sidebar options (top-left arrow to be clicked, if sidebar is not visible)')
 st.write('### Created by Vinay Babu')
 st.write('''The covitrace is a tool designed using Python and Streamlit to analyse covid vacinnation.''')
 
@@ -83,21 +84,23 @@ if st.sidebar.checkbox('Vacinnations progress (global)'):
    key='download2-csv'
     )
     
-# top and bottom 10 entries of 'people_vaccinated_per_hundred'
-    perform_people_vaccinated_per_hundred=sub_df.sort_values('people_vaccinated_per_hundred', ascending=False).drop_duplicates(['location']).drop(["people_vaccinated", "people_fully_vaccinated", "people_fully_vaccinated_per_hundred"], axis = 1)
+    with st.expander("Click here to see top and poor performers as on "+today):
     
-    if st.checkbox('Top 10 locations based on people vaccinated per hundred as on '+today):
-        st.write(perform_people_vaccinated_per_hundred.head(10))
-    if st.checkbox('Bottom 10 locations based on people vaccinated per hundred as on '+today):
-        st.write(perform_people_vaccinated_per_hundred.tail(10))        
+        # top and bottom 10 entries of 'people_vaccinated_per_hundred'
+        perform_people_vaccinated_per_hundred=sub_df.sort_values('people_vaccinated_per_hundred', ascending=False).drop_duplicates(['location']).drop(["people_vaccinated", "people_fully_vaccinated", "people_fully_vaccinated_per_hundred"], axis = 1)
 
-# top and bottom 10 entries of 'people_fully_vaccinated_per_hundred'
-    perform_people_fully_vaccinated_per_hundred=sub_df.sort_values('people_fully_vaccinated_per_hundred', ascending=False).drop_duplicates(['location']).drop(["people_vaccinated","people_vaccinated_per_hundred", "people_fully_vaccinated"], axis = 1)
-    
-    if st.checkbox('Top 10 locations based on people fully vaccinated as on '+today):            
-        st.write(perform_people_fully_vaccinated_per_hundred.head(10))
-    if st.checkbox('Bottom 10 locations based on people fully vaccinated as on '+today):            
-        st.write(perform_people_fully_vaccinated_per_hundred.tail(10))
+        if st.checkbox('Top 10 locations based on people vaccinated per hundred'):
+            st.write(perform_people_vaccinated_per_hundred.head(10))
+        if st.checkbox('Bottom 10 locations based on people vaccinated per hundred'):
+            st.write(perform_people_vaccinated_per_hundred.tail(10))        
+
+        # top and bottom 10 entries of 'people_fully_vaccinated_per_hundred'
+        perform_people_fully_vaccinated_per_hundred=sub_df.sort_values('people_fully_vaccinated_per_hundred', ascending=False).drop_duplicates(['location']).drop(["people_vaccinated","people_vaccinated_per_hundred", "people_fully_vaccinated"], axis = 1)
+
+        if st.checkbox('Top 10 locations based on people fully vaccinated per hundred'):            
+            st.write(perform_people_fully_vaccinated_per_hundred.head(10))
+        if st.checkbox('Bottom 10 locations based on people fully vaccinated per hundred'):            
+            st.write(perform_people_fully_vaccinated_per_hundred.tail(10))
 
         # Vacinnations progress (countrywise)     
 if st.sidebar.checkbox('Vacinnations progress (countrywise)'):
@@ -106,15 +109,16 @@ if st.sidebar.checkbox('Vacinnations progress (countrywise)'):
     sub_df_country = sub_df.loc[sub_df['location'] == country].sort_values(by='date', ascending=False)
     sub_df_country
     
-    # display of latest figure of vacinnation
-    people_vaccinated = sub_df_country['people_vaccinated'].iloc[0]
-    people_vaccinated_per_hundred = sub_df_country['people_vaccinated_per_hundred'].iloc[0]
-    people_fully_vaccinated = sub_df_country['people_fully_vaccinated'].iloc[0]
-    people_fully_vaccinated_per_hundred = sub_df_country['people_fully_vaccinated_per_hundred'].iloc[0]
-    st.write('People vaccinated in '+country, 'as on '+today, 'are', people_vaccinated)
-    st.write('People vaccinated per hundred in '+country, 'as on '+today, 'are', people_vaccinated_per_hundred)
-    st.write('People fully vaccinated in '+country, 'as on '+today, 'are', people_fully_vaccinated)
-    st.write('People fully vaccinated per hundred in '+country, 'as on '+today, 'are', people_fully_vaccinated_per_hundred)
+    with st.expander("Click here for the vacinnation status as on "+today):
+        # display of latest figure of vacinnation
+        people_vaccinated = sub_df_country['people_vaccinated'].iloc[0]
+        people_vaccinated_per_hundred = sub_df_country['people_vaccinated_per_hundred'].iloc[0]
+        people_fully_vaccinated = sub_df_country['people_fully_vaccinated'].iloc[0]
+        people_fully_vaccinated_per_hundred = sub_df_country['people_fully_vaccinated_per_hundred'].iloc[0]
+        st.write('People vaccinated in '+country, 'are', people_vaccinated)
+        st.write('People vaccinated per hundred in '+country, 'are', people_vaccinated_per_hundred)
+        st.write('People fully vaccinated in '+country, 'are', people_fully_vaccinated)
+        st.write('People fully vaccinated per hundred in '+country, 'are', people_fully_vaccinated_per_hundred)
     
     # data downloading as 'csv'
     @st.cache
@@ -183,7 +187,7 @@ if st.sidebar.checkbox('Vacinnations progress (countrywise)'):
 if st.sidebar.checkbox('Vacinnations progress (comparison)'):
     # selection of country from 'location'
     country = st.multiselect("Select the countries: ", sub_df['location'].unique())
-    sub_df_country_comparison = sub_df[sub_df['location'].isin(country)].sort_values(by='date', ascending=False)
+    sub_df_country_comparison = sub_df[sub_df['location'].isin(country)].sort_values(by='date', ascending=False).drop(["people_vaccinated","people_fully_vaccinated"], axis = 1)
     sub_df_country_comparison
     
     # data downloading as 'csv'
