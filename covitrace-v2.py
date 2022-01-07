@@ -1,10 +1,3 @@
-# uncomment below lines of code to install required packages
-# !pip install streamlit
-# !pip install pandas
-# !pip install numpy
-# !pip install datetime
-# !pip install plotly_express
-
 import streamlit as st
 import pandas as pd
 import numpy as np
