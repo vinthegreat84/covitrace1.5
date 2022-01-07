@@ -47,10 +47,22 @@ st.sidebar.title("Covid Vaccination Analysis")
 
 if st.sidebar.checkbox('Covid-19 data as on '+today):
     df0
+    
+    with st.expander("Click here for locations with new cases and new deaths as on "+today):
+        # top 10 entries of 'new_cases_per_million'
+        new_cases_per_million=df0.sort_values('new_cases_per_million', ascending=False).drop_duplicates(['location']).drop(["total_cases_per_million", "new_cases_smoothed_per_million", "total_deaths_per_million", "new_deaths_per_million", "new_deaths_smoothed_per_million"], axis = 1)
+
+        if st.checkbox('Top 10 locations based on new cases per million'):
+            st.write(new_cases_per_million.head(10))     
+        
+        # top 10 entries of 'new_deaths_per_million'
+        new_deaths_per_million=df0.sort_values('new_deaths_per_million', ascending=False).drop_duplicates(['location']).drop(["total_cases_per_million","new_cases_per_million", "new_cases_smoothed_per_million", "total_deaths_per_million", "new_deaths_smoothed_per_million"], axis = 1)
+
+        if st.checkbox('Top 10 locations based on new deaths per million'):
+            st.write(new_deaths_per_million.head(10))     
         
     # Covid hit (countrywise comparison)     
     if st.checkbox('Covid hit (comparison)'):
-                 
         if st.checkbox('Date filter (default is 7 days)'):
             N = 7 # set for '7' days; may be changed for the default view
             start = datetime.now() - timedelta(days=N)
@@ -67,42 +79,43 @@ if st.sidebar.checkbox('Covid-19 data as on '+today):
 
         # selection of country from 'location'
         country = st.multiselect("Select the country: ", df0['location'].unique())
-        df0_country = df0[df0['location'].isin(country)].sort_values(by='date', ascending=False)
-        df0_country             
+        df0 = df0[df0['location'].isin(country)].sort_values(by='date', ascending=False)
+        df0             
             
-    # data downloading as 'csv'
-    @st.cache
-    def convert_df(df0):
-        return df.to_csv().encode('utf-8')
-    
-    csv = convert_df(df0)
-    
-    st.download_button(
-   "Press to download data",
-   csv,
-   "file.csv",
-   "text/csv",
-   key='download0-csv'
-    )
+        # data downloading as 'csv'
+        @st.cache
+        def convert_df(df0):
+            return df.to_csv().encode('utf-8')
 
-    if st.checkbox('Show/Hide graphs of covid hit severity'):
-        fig = px.line(df0_country , x='date', y='total_cases_per_million', color="location", hover_name="location",title="total cases per million")
-        st.plotly_chart(fig, use_container_width=True)
-        
-        fig = px.line(df0_country , x='date', y='new_cases_per_million', color="location", hover_name="location",title="new cases per million")
-        st.plotly_chart(fig, use_container_width=True)
-                
-        fig = px.line(df0_country , x='date', y='new_cases_smoothed_per_million', color="location", hover_name="location",title="new cases smoothed per million")
-        st.plotly_chart(fig, use_container_width=True)
-                
-        fig = px.line(df0_country , x='date', y='total_deaths_per_million', color="location", hover_name="location",title="total deaths per million")
-        st.plotly_chart(fig, use_container_width=True)
-                        
-        fig = px.line(df0_country , x='date', y='new_deaths_per_million', color="location", hover_name="location",title="new deaths per million")
-        st.plotly_chart(fig, use_container_width=True)
-                
-        fig = px.line(df0_country , x='date', y='new_deaths_smoothed_per_million', color="location", hover_name="location",title="new deaths smoothed per million")
-        st.plotly_chart(fig, use_container_width=True)       
+        csv = convert_df(df0)
+
+        st.download_button(
+       "Press to download data",
+       csv,
+       "file.csv",
+       "text/csv",
+       key='download0-csv'
+        )
+    
+
+        if st.checkbox('Show/Hide graphs of covid hit severity'):
+            fig = px.line(df0 , x='date', y='total_cases_per_million', color="location", hover_name="location",title="total cases per million")
+            st.plotly_chart(fig, use_container_width=True)
+
+            fig = px.line(df0, x='date', y='new_cases_per_million', color="location", hover_name="location",title="new cases per million")
+            st.plotly_chart(fig, use_container_width=True)
+
+            fig = px.line(df0, x='date', y='new_cases_smoothed_per_million', color="location", hover_name="location",title="new cases smoothed per million")
+            st.plotly_chart(fig, use_container_width=True)
+
+            fig = px.line(df0, x='date', y='total_deaths_per_million', color="location", hover_name="location",title="total deaths per million")
+            st.plotly_chart(fig, use_container_width=True)
+
+            fig = px.line(df0, x='date', y='new_deaths_per_million', color="location", hover_name="location",title="new deaths per million")
+            st.plotly_chart(fig, use_container_width=True)
+
+            fig = px.line(df0, x='date', y='new_deaths_smoothed_per_million', color="location", hover_name="location",title="new deaths smoothed per million")
+            st.plotly_chart(fig, use_container_width=True)       
 
 if st.sidebar.checkbox('Vacinnation data as on '+today):
     df
