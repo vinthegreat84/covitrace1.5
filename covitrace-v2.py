@@ -12,11 +12,24 @@ from datetime import date, datetime, timedelta
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from plotly import tools
+
+@st.cache
+def fetch_covid():
+    url = 'https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv'
+#     df = pd.read_csv(url)
+    col_list =["location","date","total_cases_per_million", "new_cases_per_million", "new_cases_smoothed_per_million", "total_deaths_per_million", "new_deaths_per_million", "new_deaths_smoothed_per_million"]
+    df = pd.read_csv(url, usecols=col_list)
+    df['date'] = pd.to_datetime(df['date']).dt.date
+    return df
+    
+df0 = fetch_covid()
 
 @st.cache
 def fetch_vaccination():
     url = 'https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/vaccinations.csv'
-    df = pd.read_csv(url)
+    col_list =["location","date","people_vaccinated", "people_vaccinated_per_hundred", "people_fully_vaccinated", "people_fully_vaccinated_per_hundred"]
+    df = pd.read_csv(url, usecols=col_list)
     df['date'] = pd.to_datetime(df['date']).dt.date
     return df
     
@@ -30,9 +43,68 @@ st.caption('Check the sidebar options (top-left arrow to be clicked, if sidebar 
 st.write('### Created by Vinay Babu')
 st.write('''The covitrace is a tool designed using Python and Streamlit to analyse covid vacinnation.''')
 
-st.sidebar.title("Covid Vaccination Analysis")
+st.sidebar.title("Covid Vaccination Analysis") 
 
-if st.sidebar.checkbox('Raw data as on '+today):
+if st.sidebar.checkbox('Covid-19 data as on '+today):
+    df0
+        
+    # Covid hit (countrywise comparison)     
+    if st.checkbox('Covid hit (comparison)'):
+                 
+        if st.checkbox('Date filter (default is 7 days)'):
+            N = 7 # set for '7' days; may be changed for the default view
+            start = datetime.now() - timedelta(days=N)
+            end = datetime.now()
+            
+            start_date = st.date_input('Start date', start)
+            end_date = st.date_input('End date (default set for today)', end)
+            if start_date < end_date:
+                pass
+                mask = (df0['date'] >= start_date) & (df0['date'] <= end_date)
+                df0 = df0.loc[mask]
+            else:
+                st.error('Error: End date should be chosen after the start day.')
+
+        # selection of country from 'location'
+        country = st.multiselect("Select the country: ", df0['location'].unique())
+        df0_country = df0[df0['location'].isin(country)].sort_values(by='date', ascending=False)
+        df0_country             
+            
+    # data downloading as 'csv'
+    @st.cache
+    def convert_df(df0):
+        return df.to_csv().encode('utf-8')
+    
+    csv = convert_df(df0)
+    
+    st.download_button(
+   "Press to download data",
+   csv,
+   "file.csv",
+   "text/csv",
+   key='download0-csv'
+    )
+
+    if st.checkbox('Show/Hide graphs of covid hit severity'):
+        fig = px.line(df0_country , x='date', y='total_cases_per_million', color="location", hover_name="location",title="total cases per million")
+        st.plotly_chart(fig, use_container_width=True)
+        
+        fig = px.line(df0_country , x='date', y='new_cases_per_million', color="location", hover_name="location",title="new cases per million")
+        st.plotly_chart(fig, use_container_width=True)
+                
+        fig = px.line(df0_country , x='date', y='new_cases_smoothed_per_million', color="location", hover_name="location",title="new cases smoothed per million")
+        st.plotly_chart(fig, use_container_width=True)
+                
+        fig = px.line(df0_country , x='date', y='total_deaths_per_million', color="location", hover_name="location",title="total deaths per million")
+        st.plotly_chart(fig, use_container_width=True)
+                        
+        fig = px.line(df0_country , x='date', y='new_deaths_per_million', color="location", hover_name="location",title="new deaths per million")
+        st.plotly_chart(fig, use_container_width=True)
+                
+        fig = px.line(df0_country , x='date', y='new_deaths_smoothed_per_million', color="location", hover_name="location",title="new deaths smoothed per million")
+        st.plotly_chart(fig, use_container_width=True)       
+
+if st.sidebar.checkbox('Vacinnation data as on '+today):
     df
         
     # data downloading as 'csv'
@@ -50,13 +122,13 @@ if st.sidebar.checkbox('Raw data as on '+today):
    key='download1-csv'
     )
 
-if st.sidebar.checkbox('Date filter'):
+if st.sidebar.checkbox('Date filter (default is 30 days)'):
     N_DAYS = 30 # set for '30' days; may be changed for the default view
     start = datetime.now() - timedelta(days=N_DAYS)
     end = datetime.now()
     
-    start_date = st.sidebar.date_input('Start date (default set for 30 days back)', start)
-    end_date = st.sidebar.date_input('End date (default set for today)', end) 
+    start_date = st.sidebar.date_input('Start date', start)
+    end_date = st.sidebar.date_input('End date (default: today)', end) 
     if start_date < end_date:
         pass
         mask = (df['date'] >= start_date) & (df['date'] <= end_date)
