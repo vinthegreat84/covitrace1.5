@@ -8,6 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from plotly import tools
+import io
 
 @st.cache
 def fetch_covid():
@@ -30,6 +31,18 @@ def fetch_vaccination():
     
 df = fetch_vaccination()
 
+def plot_html(plot):
+    buffer = io.StringIO()
+    plot.write_html(buffer, include_plotlyjs='cdn')
+    html_bytes = buffer.getvalue().encode()
+
+    st.download_button(
+    label='Download HTML',
+    data=html_bytes,
+    file_name='plot.html',
+    mime='text/html'
+            )
+
 today = date.today().strftime("%d %b, %Y")
 
 st.title("covitrace - 1.5")
@@ -48,13 +61,25 @@ if st.sidebar.checkbox('Covid-19 data as on '+today):
         new_cases_per_million=df0.sort_values('new_cases_per_million', ascending=False).drop_duplicates(['location']).drop(["total_cases_per_million", "new_cases_smoothed_per_million", "total_deaths_per_million", "new_deaths_per_million", "new_deaths_smoothed_per_million"], axis = 1)
 
         if st.checkbox('Top 10 locations based on new cases per million'):
-            st.write(new_cases_per_million.head(10))     
+            st.write(new_cases_per_million.head(10))
+            @st.cache
+            def convert_df(new_cases_per_million):
+                return new_cases_per_million.to_csv(index=False).encode('utf-8')
+
+            new_cases_per_million = convert_df(new_cases_per_million)
+            st.download_button("Press to download", new_cases_per_million, "new_cases_per_million.csv", "csv", key='download-new_cases_per_million')            
         
         # top 10 entries of 'new_deaths_per_million'
         new_deaths_per_million=df0.sort_values('new_deaths_per_million', ascending=False).drop_duplicates(['location']).drop(["total_cases_per_million","new_cases_per_million", "new_cases_smoothed_per_million", "total_deaths_per_million", "new_deaths_smoothed_per_million"], axis = 1)
 
         if st.checkbox('Top 10 locations based on new deaths per million'):
-            st.write(new_deaths_per_million.head(10))     
+            st.write(new_deaths_per_million.head(10))
+            @st.cache
+            def convert_df(new_deaths_per_million):
+                return new_deaths_per_million.to_csv(index=False).encode('utf-8')
+
+            new_deaths_per_million = convert_df(new_deaths_per_million)
+            st.download_button("Press to download", new_deaths_per_million, "new_deaths_per_million.csv", "csv", key='download-new_deaths_per_million')            
         
     # Covid hit (countrywise comparison)     
     if st.checkbox('Covid hit (comparison)'):
@@ -96,21 +121,39 @@ if st.sidebar.checkbox('Covid-19 data as on '+today):
         if st.checkbox('Show/Hide graphs of covid hit severity'):
             fig = px.line(df0 , x='date', y='total_cases_per_million', color="location", hover_name="location",title="total cases per million")
             st.plotly_chart(fig, use_container_width=True)
+            # exporting the plot to the local machine
+            with st.expander("Click to export"):
+                plot_html(fig)            
 
             fig = px.line(df0, x='date', y='new_cases_per_million', color="location", hover_name="location",title="new cases per million")
             st.plotly_chart(fig, use_container_width=True)
+            # exporting the plot to the local machine
+            with st.expander("Click to export"):
+                plot_html(fig)             
 
             fig = px.line(df0, x='date', y='new_cases_smoothed_per_million', color="location", hover_name="location",title="new cases smoothed per million")
             st.plotly_chart(fig, use_container_width=True)
+            # exporting the plot to the local machine
+            with st.expander("Click to export"):
+                plot_html(fig)             
 
             fig = px.line(df0, x='date', y='total_deaths_per_million', color="location", hover_name="location",title="total deaths per million")
             st.plotly_chart(fig, use_container_width=True)
+            # exporting the plot to the local machine
+            with st.expander("Click to export"):
+                plot_html(fig)            
 
             fig = px.line(df0, x='date', y='new_deaths_per_million', color="location", hover_name="location",title="new deaths per million")
             st.plotly_chart(fig, use_container_width=True)
+            # exporting the plot to the local machine
+            with st.expander("Click to export"):
+                plot_html(fig)            
 
             fig = px.line(df0, x='date', y='new_deaths_smoothed_per_million', color="location", hover_name="location",title="new deaths smoothed per million")
-            st.plotly_chart(fig, use_container_width=True)       
+            st.plotly_chart(fig, use_container_width=True)
+            # exporting the plot to the local machine
+            with st.expander("Click to export"):
+                plot_html(fig)            
 
 if st.sidebar.checkbox('Vacinnation data as on '+today):
     df
@@ -238,6 +281,9 @@ if st.sidebar.checkbox('Vacinnations progress (countrywise)'):
         fig.update_yaxes(title_text="people_fully_vaccinated", secondary_y=True)
         
         st.plotly_chart(fig, use_container_width=True)
+        # exporting the plot to the local machine
+        with st.expander("Click to export"):
+            plot_html(fig)      
         
     if st.checkbox('Show/Hide graph of people vaccinated per hundred and people fully vaccinated per hundred'):
         # Create figure with secondary y-axis
@@ -261,7 +307,10 @@ if st.sidebar.checkbox('Vacinnations progress (countrywise)'):
         fig.update_yaxes(title_text="people_vaccinated_per_hundred", secondary_y=False)
         fig.update_yaxes(title_text="people_fully_vaccinated_per_hundred", secondary_y=True)
         
-        st.plotly_chart(fig, use_container_width=True)        
+        st.plotly_chart(fig, use_container_width=True)
+        # exporting the plot to the local machine
+        with st.expander("Click to export"):
+            plot_html(fig)        
         
 # Vacinnations progress (countrywise comparison)     
 if st.sidebar.checkbox('Vacinnations progress (comparison)'):
@@ -288,10 +337,16 @@ if st.sidebar.checkbox('Vacinnations progress (comparison)'):
     if st.checkbox('Show/Hide graph of people vaccinated per hundred for countrywise comparison'):
         fig = px.line(sub_df_country_comparison, x='date', y='people_vaccinated_per_hundred', color="location", hover_name="location",title="People vaccinated per hundred")
         st.plotly_chart(fig, use_container_width=True)
+        # exporting the plot to the local machine
+        with st.expander("Click to export"):
+            plot_html(fig)        
         
     if st.checkbox('Show/Hide graph of people fully vaccinated per hundred for countrywise comparison'):
         fig = px.line(sub_df_country_comparison, x='date', y='people_fully_vaccinated_per_hundred', color="location", hover_name="location",title="People fully vaccinated per hundred")
         st.plotly_chart(fig, use_container_width=True)
+        # exporting the plot to the local machine
+        with st.expander("Click to export"):
+            plot_html(fig)        
         
 st.sidebar.write("For vaccination dataset (updated each morning, London time), check out the [citation](https://www.nature.com/articles/s41562-021-01122-8)", unsafe_allow_html=True)
     
