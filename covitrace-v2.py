@@ -54,6 +54,7 @@ st.write('''The covitrace is a tool designed using Python and Streamlit to analy
 st.sidebar.title("Covid Vaccination Analysis") 
 
 if st.sidebar.checkbox('Covid-19 data as on '+today):
+    st.write('#### Covid-19 data as on '+today)    
     df0
     
     with st.expander("Click here for locations with new cases and new deaths as on "+today):
@@ -61,6 +62,7 @@ if st.sidebar.checkbox('Covid-19 data as on '+today):
         new_cases_per_million=df0.sort_values('new_cases_per_million', ascending=False).drop_duplicates(['location']).drop(["total_cases_per_million", "new_cases_smoothed_per_million", "total_deaths_per_million", "new_deaths_per_million", "new_deaths_smoothed_per_million"], axis = 1)
 
         if st.checkbox('Top 10 locations based on new cases per million'):
+            st.write('#### Top 10 locations based on new cases per million')            
             st.write(new_cases_per_million.head(10))
             @st.cache
             def convert_df(new_cases_per_million):
